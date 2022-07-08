@@ -1,19 +1,8 @@
 const userModel = require("../models/user");
 const bcrypt = require("bcrypt");
-const multer = require("multer");
 const jwt = require("jsonwebtoken");
-// const JWT_SECURITY_KEY=process.env.JWT_SECURITY_KEY || "jhkhggcghh"
 
 class userControll {
-  //   static getUserData = async (req, res) => {
-  //     try {
-  //       const userList = await userModel.find();
-  //       res.send(userList);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-
   //adding new user
   static userRegistration = async (req, res) => {
     const { name, email, password, password_confirmation } = req.body;
@@ -31,7 +20,6 @@ class userControll {
         expiresIn: "5d",
       });
       //{expiresIn:"5d"} ==> expires in 5 days (m=> min)
-      console.log("token", registerToken);
       res.send({
         status: "Sucess",
         message: "Registration Sucessfull.",
@@ -49,15 +37,12 @@ class userControll {
   static userLogin = async (req, res) => {
     console.log(req.body);
     const { email, password } = req.body;
-
     try {
       if (email && password) {
         const user = await userModel.findOne({ email: email });
         console.log(user);
         if (user != null) {
-          // console.log(password,user.password)
           const isMatch = await bcrypt.compare(password, user.password);
-          //console.log("isMatch",isMatch)
           if (user.email === email && isMatch) {
             const loginToken = jwt.sign({ userID: user._id }, "jhkhggcghh", {
               expiresIn: "5d",
@@ -87,15 +72,6 @@ class userControll {
       res.send({ status: "failed", message: "Unable to login." });
     }
   };
-
-  // static uploadFile=async(req,res)=>{
-  //     try{
-
-  //        res.send("File Uploaded SUcessful.")
-  //     }catch(err){
-  //         console.log(err);
-  //     }
-  // }
 }
 
 module.exports = userControll;

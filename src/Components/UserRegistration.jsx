@@ -20,6 +20,18 @@ const UserRegistration = () => {
   };
 
   const onRegisterClick = () => {
+    if (
+      data.name === "" ||
+      data.email === "" ||
+      data.password === "" ||
+      data.password_confirmation === ""
+    ) {
+      alert("User Name and password should not be blank.");
+      return;
+    } else if (data.password !== data.password_confirmation) {
+      alert("Password and confirm Password does not matched");
+      return;
+    }
     axios
       .post("http://localhost:9013/userReg", data)
       .then((res) => {

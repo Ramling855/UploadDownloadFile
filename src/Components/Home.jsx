@@ -13,6 +13,7 @@ const Home = () => {
       .get("http://localhost:9013/file")
       .then((res) => {
         setData(res.data);
+        setFlag(true);
       })
       .catch((err) => {
         console.log(err);
@@ -28,25 +29,22 @@ const Home = () => {
   const downloadFile = async (id) => {
     let key = localStorage.getItem("image-password");
     let pass = prompt("Enter 6 digit password here.");
-    console.log(pass);
+
     if (pass == key) {
       await axios
         .get(`http://localhost:9013/download/${id}`)
         .then((res) => {
-          console.log(res.data);
-          // console.log(res.data[0].file);
           const splitArray = res.data.split("\\");
           const newArray = splitArray[splitArray.length - 1];
-          // console.log("path", splitArray.join("\\"), newArray);
           fileDownload(splitArray.join("\\"), newArray);
           alert("File Downloaded.");
-          // navigate("/home");
+          navigate("/home");
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      alert("file can't downloaded");
+      alert("File can't downloaded. Password dosent matches");
     }
   };
 
@@ -80,7 +78,6 @@ const Home = () => {
     }
     password = uuid.join("");
     localStorage.setItem("image-password", password);
-
     await axios
       .post("http://localhost:9013/file", formData, configAxios)
       .then((res) => {
@@ -160,7 +157,6 @@ const Home = () => {
             </table>
           </div>
         </div>
-        <div className="row"></div>
       </div>
     </>
   );
