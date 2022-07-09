@@ -1,16 +1,44 @@
 import React from "react";
+import 'antd/dist/antd.css';
+
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { UploadOutlined,DownloadOutlined,DeleteOutlined } from '@ant-design/icons';
+import jwt_decode from "jwt-decode";
+import { Card } from 'antd';
 import { useNavigate } from "react-router-dom";
 import fileDownload from "js-file-download";
-const Home = () => {
+const HomePage = () => {
+
+/////////////////
+const headers = {
+    token: localStorage.getItem("user-token"),
+    
+  };
+
+   
+var token = headers.token;
+
+var decoded = jwt_decode(token);
+ var tokenData=decoded.result
+console.log(tokenData.email,"decodeedd");
+console.log(headers.token,"hh")
+const[up,setUp]=useState()
+const [state, setState] = useState();
+
+
+
+
+
+
+////////////////
   const [data, setData] = useState([]);
   var password = [];
   const [flag, setFlag] = useState(false);
-
+  const [photo, setPhoto] = useState("");
   useEffect(() => {
     axios
-      .get("http://localhost:9013/file")
+      .get(`http://localhost:7000/file?email=${tokenData.email}`)
       .then((res) => {
         setData(res.data);
         setFlag(true);
@@ -18,12 +46,13 @@ const Home = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, [flag]);
+  });
   const navigate = useNavigate();
   const [img, setImg] = useState("");
 
   const onFileChange = (e) => {
     setImg(e.target.files[0]);
+    setFlag(true)
   };
 
   const downloadFile = async (id) => {
@@ -31,12 +60,21 @@ const Home = () => {
     let pass = prompt("Enter 6 digit password here.");
 
     if (pass == key) {
-      await axios
-        .get(`http://localhost:9013/download/${id}`)
-        .then((res) => {
-          const splitArray = res.data.split("\\");
-          const newArray = splitArray[splitArray.length - 1];
-          fileDownload(splitArray.join("\\"), newArray);
+    //   await axios
+    //     .get(`http://localhost:7000/download/${id}`)
+        
+    axios({
+        url:`http://localhost:7000/download/${id}`,
+        method:"GET",
+        responseType:"blob"
+    })
+    .then((res) => {
+
+        //   fileDownload(splitArray.join("\\"), newArray);
+        fileDownload(res.data,res.data.type);
+        console.log(res.data.type,"filespathggggggggggg")
+          setPhoto(res.data)
+          console.log(res.data,res.data.type)
           alert("File Downloaded.");
           navigate("/home");
         })
@@ -49,9 +87,10 @@ const Home = () => {
   };
 
   const deleteHandle = async (id) => {
+    setFlag(true)
     console.log(id);
     await axios
-      .delete(`http://localhost:9013/file/delete/${id}`)
+      .delete(`http://localhost:7000/file/delete/${id}`)
       .then((res) => {
         alert("File Deleted.");
         navigate("/home");
@@ -70,7 +109,9 @@ const Home = () => {
   const formData = new FormData();
 
   const onSubmitHandle = async () => {
-    formData.append("file", img);
+    setFlag(true)
+    formData.append("email",tokenData.email)
+    formData.append("file", img)
     let str = "0123456789";
     let uuid = [];
     for (let i = 0; i < 6; i++) {
@@ -79,7 +120,7 @@ const Home = () => {
     password = uuid.join("");
     localStorage.setItem("image-password", password);
     await axios
-      .post("http://localhost:9013/file", formData, configAxios)
+      .post("http://localhost:7000/file", formData, configAxios)
       .then((res) => {
         alert(`File Submited... Your password is ${password}`);
         navigate("/home");
@@ -89,15 +130,25 @@ const Home = () => {
         console.log(err);
       });
   };
+
+
+  console.log(data,"path")
   return (
-    <>
-      <div className="container mt-5">
-        <h4 className="alert alert-dark text-center">Upload File</h4>
+   <div  style={{backgroundColor:"GrayText",height:"1000px"}}>
+ <div style={{backgroundColor:"GrayText"}}>
+
+<div style={{display:"flex",justifyContent:"center"}} className="site-card-border-less-wrapper">
+    <Card
+
+title="Upload Files"
+      bordered={false}
+      style={{
+        width: 1000,justifyContent:"center"
+      }}
+    >
 
         <div className="mb-3">
-          <label htmlFor="exampleInputEmail1" className="form-label">
-            Upload File :
-          </label>
+          
           <input
             className="form-control "
             type="file"
@@ -105,24 +156,42 @@ const Home = () => {
             id="formFile"
             onChange={onFileChange}
           />
+
         </div>
 
-        <button type="submit" className="btn btn-dark" onClick={onSubmitHandle}>
-          Submit
+        <button  type="submit" className="btn btn-dark" onClick={onSubmitHandle}>
+        <UploadOutlined />   Submit
         </button>
-      </div>
+ 
+ </Card>
+  </div>
+
+
+
+
+
+  <div style={{display:"flex",justifyContent:"center"}} className="site-card-border-less-wrapper">
+    <Card
+
+      bordered={false}
+      style={{
+       height:"50%", width: 1000,justifyContent:"center"
+      }}
+    >
 
       <div className="container mt-5">
-        <h1 className=" text-center">View File Uploaded</h1>
+        <h1 style={{backgroundColor:"yellowgreen"}} className=" text-center">File Data</h1>
         <div className="row">
           <div className="col-sm-10 offset-1 mt-5">
             <table className="table">
-              <thead>
+              <thead style={{backgroundColor:"yellow"}}>
                 <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Image</th>
+                  <th scope="col">Sr.No.</th>
+                  <th scope="col">Path</th>
+                  
+
                   <th scope="col">Download</th>
-                  <th scope="col">Action</th>
+                  <th scope="col">Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -131,6 +200,7 @@ const Home = () => {
                     <tr key={i}>
                       <th scope="row">{i + 1}</th>
 
+                      
                       <td>{ele.file}</td>
                       <td>
                         <button
@@ -138,6 +208,7 @@ const Home = () => {
                           className="btn btn-info btn-sm"
                           onClick={() => downloadFile(ele._id)}
                         >
+                            <DownloadOutlined />
                           Download
                         </button>
                       </td>
@@ -147,6 +218,7 @@ const Home = () => {
                           className="btn btn-danger btn-sm"
                           onClick={() => deleteHandle(ele._id)}
                         >
+                            <DeleteOutlined />
                           Delete
                         </button>
                       </td>
@@ -158,8 +230,12 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </>
+      
+ </Card>
+  </div>
+    </div>
+   </div>
   );
 };
 
-export default Home;
+export default HomePage;

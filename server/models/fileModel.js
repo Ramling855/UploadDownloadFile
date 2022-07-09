@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 
-const cvSchema = new mongoose.Schema({
+const newSchema = new mongoose.Schema({
+
+  email:{type:String},
   file: { type: String, required: true, trim: true },
 });
 
-const cvModel = mongoose.model("file_upload", cvSchema);
+module.exports = mongoose.model("upload", newSchema);
 
-module.exports = cvModel;
+ 

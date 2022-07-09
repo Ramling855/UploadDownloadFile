@@ -1,14 +1,33 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import  { LogoutOutlined } from '@ant-design/icons';
+// import { Space } from 'antd';
+import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+function Header() {
+
+    const headers = {
+        token: localStorage.getItem("user-token"),
+        
+      };
+    
+       
+    var token = headers.token;
+    
+
+const navigate=useNavigate()
+const logout=()=>{
+    localStorage.removeItem("user-token")
+navigate("/")
+}
+
   return (
-    <>
-      <nav className="navbar navbar-expand-lg bg-primary">
-        <div className="container-fluid">
-          <h5 className=" text-center" style={{ color: "black" }}>
-            File Upload / Downloader
-          </h5>
+    <div className="App">
+      <nav class="navbar navbar-expand-lg bg-dark">
+      <div className="container-fluid">
+         {token? <h5 className=" text-center" style={{ color: "white" }}>
+           HomePage
+          </h5>:" "}
           <button
             style={{ color: "white" }}
             className="navbar-toggler"
@@ -29,20 +48,22 @@ const Navbar = () => {
                   aria-current="page"
                   href="/login"
                 >
-                  <Link to="/login">Login</Link>
+               {token?" ":<Link to="/login">Login</Link>}   
                 </a>
               </li>
               <li className="nav-item">
                 <a className="nav-link active" aria-current="page" href="/">
-                  <Link to="/">User Registration</Link>
+                {token?" ":  <Link to="/">User Registrations</Link>}
                 </a>
               </li>
             </ul>
-          </div>
+          { token?<button style={{ backgroundColor: "black",color: "white" }} onClick={logout}  >    logout <LogoutOutlined/>
+          </button>:""
+   }   </div>
         </div>
-      </nav>
-    </>
+</nav>
+    </div>
   );
-};
+}
 
-export default Navbar;
+export default Header;

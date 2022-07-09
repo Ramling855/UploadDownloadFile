@@ -1,19 +1,32 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "./Components/Home";
-import UserRegistration from "./Components/UserRegistration";
-import Login from "./Components/Login";
-import Navbar from "./Components/Navbar";
+import Header from "./Header";
+import Signup from "./Components/Signup";
+import Signin from "./Components/Signin"
+import HomePage from "./Components/HomePage";
+import { useNavigate } from "react-router-dom";
+
+
 function App() {
-  let token = localStorage.getItem("token");
+  const navigate=useNavigate()
+  const headers = {
+    token: localStorage.getItem("user-token"),
+    
+  };
+
+   
+var token = headers.token;
+
   return (
-    <div className="App">
-      <Navbar />
+    <div className="App" style={{backgroundColor:"GrayText",height:"1000px"}} >
+      <Header/>
       <Routes>
-        {token ? <Route path="/home" element={<Home />} /> : ""}
-        <Route path="/" element={<UserRegistration />} />
-        <Route path="/" element={<UserRegistration />} />
-        <Route path="/login" element={<Login />} />
+ <Route path="/" element={<Signup/>} />
+ <Route path="/login" element={<Signin/>} />
+        
+        {token?<Route path="/home" element={<HomePage/>} />: <Route path="/" element={<Signup/>} /> } 
       </Routes>
+
+      
     </div>
   );
 }
